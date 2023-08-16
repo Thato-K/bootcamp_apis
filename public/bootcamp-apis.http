@@ -1,0 +1,20 @@
+
+GET http://localhost:6007/api/word_game?sentence=I am Thato
+Content-type: application/json
+
+
+#Calculate Total phone bill
+
+POST http://localhost:6007/api/phonebill/total
+Content-Type: application/json
+
+
+#Get Prices for calls and sms
+GET http://localhost:6007/api/phonebill/prices
+Content-Type: application/json
+
+#Set calls and sms price
+POST http://localhost:6007/api/phonebill/price
+
+#Check for airtime
+POST http://localhost:6007/api/enough

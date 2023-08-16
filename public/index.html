@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js"></script>
+
+</head>
+
+<body style="padding: 20px; margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: pink;">
+    <h1 style="text-align: center">My API Widgets</h1>
+
+    <hr>
+
+    <h2>Word Widget API</h2>
+
+    <div x-data="{
+        sentence : '',
+        longestWord : '',
+        shortestWord : '',
+        wordLength : 0,
+
+        checkSentence() {
+
+            axios
+            .get(`/api/word_game?sentence=${this.sentence}`)
+            .then((result) => {
+                this.longestWord = result.data.longestWord;
+                this.shortestWord = result.data.shortestWord;
+                this.wordLength = result.data.sum;
+            });
+           
+        }
+    }">
+
+        <div>
+            <textarea x-model="sentence" name="" id="" cols="30" rows="10"></textarea>
+            <div>
+                <button x-on:click="checkSentence">Check sentence</button>
+            </div>
+        </div>
+
+        <div>
+            <div>
+                Longest word: <span x-text="longestWord"></span>
+            </div>
+            <div>
+                Shortest word: <span x-text="shortestWord"></span>
+            </div>
+            <div>
+                Word Length: <span x-text="wordLength"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>Total Phone bill Widgets</h2>
+
+    <div x-data="{
+                billString:'',
+                totalPrice:'',
+                callPrice: 2.75,
+                smsPrice: 0.65,
+                currentPrices: {
+                    call: 0,
+                    sms: 0
+                },
+
+                fetchCurrentPrices(){
+                    axios.get('/api/phonebill/prices').then(res =>{
+                        this.currentPrices.call = res.data.prices.call;
+                        this.currentPrices.sms = res.data.prices.sms;
+                    })
+                },
+
+                getTotalPrice(){
+                    axios.post(`/api/phonebill/total`,{bill: this.billString})
+                        .then(result => {
+                            this.totalPrice = result.data.total;
+                        })
+                        .catch(error => {
+                            console.error('Error fectching total price', error);
+                        });
+                },
+                
+
+                setPrice(type) {
+                    const price = type === 'call' ? this.callPrice : this.smsPrice;
+                    axios.post('/api/phonebill/price', {type, price})
+                        .then(result => {
+                            console.log(result.data.message);
+                        })
+                        .catch(error => {
+                            console.error('Error setting price:', error);
+                        });
+                },
+
+                changePrice(type) {
+                    axios.post('/api/phonebill/update/prices', {type: type, updatedCost: this.currentPrices[type]}).then(res =>{
+                        console.log(res.data);
+                    })
+                }
+             }" x-init="fetchCurrentPrices()">
+
+
+        <div>
+            <label for="billString">Enter bill string:</label>
+            <input type="text" id="billString" x-model="billString">
+            <button x-on:click="getTotalPrice()">Calculate Total</button>
+            <p> Total: <span x-text="totalPrice"></span></p>
+        </div>
+
+        <div>
+            <h3>Change Prices</h3>
+
+            <div>
+                <label for="callPrice">Call Price(R):</label>
+                <input type="number" id="callPrice" step="0.01" x-model="currentPrices.call"
+                    placeholder="Enter the price">
+                <button x-on:click="changePrice('call')">Update Call Price</button>
+            </div>
+
+            <br>
+
+            <div>
+                <label for="smsPrice">SMS Price(R):</label>
+                <input type="number" id="smsPrice" step="0.01" x-model="currentPrices.sms"
+                    placeholder="Enter the price">
+                <button x-on:click="changePrice('sms')">Update SMS Price</button>
+            </div>
+
+            <h3>Current Prices</h3>
+            <p>Call Price: <span x-text="currentPrices.call"></span></p>
+            <p>SMS Price: <span x-text="currentPrices.sms"></span></p>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- <h1>Enough Airtime Widgets</h1> -->
+
+    <!-- <div x-data="{
+        usage:'',
+        availableAirtime: 0,
+        result: '',
+        checkAirtime() {
+
+            axios
+                .post(`/api/enough`, {usage: this.usage, available: this.availableAirtime})
+                .then(response => {
+                    this.result = 'R' + response.data.toFixed(2);
+                })
+                .catch(error => {
+                    console.error('Error checking the airtime', error);
+                });
+        }
+    }">
+
+        <div>
+
+            <div>
+                <label for="usage">Projected Usage:</label>
+                <input type="text" id="usage" x-model="usage">
+            </div>
+
+            <br>
+
+            <div>
+                <label for="availableAirtime">Available Airtime(R):</label>
+                <input type="number" id="availableAirtime" step="0.01" x-model="availableAirtime">
+                <button x-on:click="checkAirtime">Update Airtime</button>
+                <p>Remaining Airtime: <span x-text="result"></span></p>
+               
+            </div>
+
+        </div>
+
+    </div> -->
+
+    <script>
+        function enoughAirtimeWidget() {
+            return {
+                usage: "",
+                availableAirtime: 0,
+                result: "",
+
+                checkAirtime() {
+    console.log("Usage:", this.usage);
+    console.log("Available Airtime:", this.availableAirtime);
+
+    axios.post("/api/enough", {usage: this.usage, available: this.availableAirtime})
+        .then(response => {
+            console.log("Response:", response.data);
+            this.result = 'R' + response.data.result;
+        })
+        .catch(error => {
+            console.error("Error checking airtime:", error);
+        });
+}
+
+            };
+        }
+    </script>
+
+    <div x-data="enoughAirtimeWidget()">
+        <h2>Enough Airtime Widgets</h2>
+        <div>
+            <div>
+                <label for="usage">Projected Usage:</label>
+                <input type="text" id="usage" x-model="usage">
+            </div>
+
+            <br>
+
+            <label for="availableAirtime">Airtime Available</label>
+            <input type="number" id="availableAirtime" step="0.01" x-model="availableAirtime">
+            <button x-on:click="checkAirtime">Update Airtime Balance</button>
+            <p>Remaining Airtime: <span x-text="result"></span></p>
+        </div>
+    </div>
+    <hr>
+
+</body>
+
+</html>
