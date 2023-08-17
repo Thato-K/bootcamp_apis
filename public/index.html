@@ -198,7 +198,7 @@
     axios.post("/api/enough", {usage: this.usage, available: this.availableAirtime})
         .then(response => {
             console.log("Response:", response.data);
-            this.result = 'R' + response.data.result;
+            this.result = response.data.result;
         })
         .catch(error => {
             console.error("Error checking airtime:", error);
